@@ -8,6 +8,7 @@ const volumeBar = document.querySelector('.volume-bar')
 const currentTime = document.querySelector('.time-elapsed')
 const duration = document.querySelector('.time-duration')
 const fullScreenBtn = document.querySelector('.fullscreen')
+const speed = document.querySelector('.player-speed')
 
 // Play & Pause ----------------------------------- //
 
@@ -56,9 +57,13 @@ function setProgress (e) {
 
 // Volume Controls --------------------------- //
 
+// Variable to be changed by the volume controls so it can be saved and returned to
+let lastVolume = 1
+
+
 // Volume bar
 function changeVolume (e) {
-    // controlling the volume via clicking the bar
+    // controlling the volume via clicking the bar, the values below are discovered via console logging volume
     let volume = e.offsetX / volumeRange.offsetWidth
     if (volume < 0.1) {
         volume = 0
@@ -77,20 +82,42 @@ function changeVolume (e) {
     } else if (volume === 0) {
         volumeIcon.classList.add('fas', 'fa-volume-off')
     }
+    lastVolume = volume
 }
 
+// mute / unmute
+function toggleMute () {
+    volumeIcon.className = ''
+    // video.volume asks if the volume exists, ie is not 0
+    if (video.volume) {
+        lastVolume = video.volume
+        video.volume = 0
+        volumeBar.style.width = 0
+        volumeIcon.classList.add('fas', 'fa-volume-mute')
+        volumeIcon.setAttribute('title', 'Unmute')
+    } else {
+        video.volume = lastVolume
+        volumeBar.style.width = `${lastVolume * 100}%`
+        volumeIcon.classList.add('fas', 'fa-volume-up')
+        volumeIcon.setAttribute('title', 'Mute')
+    }
+}
 
 // Change Playback Speed -------------------- //
-
+function changeSpeed() {
+    video.playbackRate = speed.value
+}
 
 
 // Fullscreen ------------------------------- //
 
 
-// Event lsiteners
+// Event listeners
 playBtn.addEventListener('click', togglePlay)
 video.addEventListener('click', togglePlay) 
 video.addEventListener('timeupdate', updateProgress)
 video.addEventListener('canplay', updateProgress)
 progressRange.addEventListener('click', setProgress)
 volumeRange.addEventListener('click', changeVolume)
+volumeIcon.addEventListener('click', toggleMute)
+speed.addEventListener('change', changeSpeed)
